@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# LLM Cost Autopilot local state
+data/*.db
+data/*.db-*
+artifacts/smoke/*.tmp
+
