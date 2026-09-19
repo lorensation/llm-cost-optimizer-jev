@@ -1,0 +1,8 @@
+{
+  "id":"classify_ticket_v1", "version":"1", "family":"classification",
+  "description":"Classify a support ticket.",
+  "output_schema":{"type":"object","properties":{"label":{"type":"string","enum":["billing","technical","account","abstain"]}},"required":["label"],"additionalProperties":false},
+  "taxonomy":{"billing":"Payments, invoices, refunds.","technical":"Broken or unexpected product behavior.","account":"Login, permissions, or profile.","abstain":"Evidence is insufficient or multiple labels are equally supported."},
+  "required_checks":["json_schema","taxonomy","semantic_label"],
+  "allow_abstention":true, "min_quality":0.85, "max_source_chars":24000
+}

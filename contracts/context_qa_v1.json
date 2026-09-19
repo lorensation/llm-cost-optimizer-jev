@@ -1,0 +1,8 @@
+{
+  "id":"context_qa_v1", "version":"1", "family":"context_qa",
+  "description":"Answer only from supplied context and cite evidence spans.",
+  "output_schema":{"type":"object","properties":{"answer":{"type":"string"},"citations":{"type":"array","items":{"type":"string"}},"abstained":{"type":"boolean"}},"required":["answer","citations","abstained"],"additionalProperties":false},
+  "required_checks":["json_schema","citations","claim_support","coverage"],
+  "allow_abstention":true, "min_quality":0.88, "max_source_chars":24000
+}
+

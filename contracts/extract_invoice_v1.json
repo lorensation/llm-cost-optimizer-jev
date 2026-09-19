@@ -1,0 +1,7 @@
+{
+  "id": "extract_invoice_v1", "version": "1", "family": "extraction",
+  "description": "Extract invoice number and total from the supplied source.",
+  "output_schema": {"type":"object","properties":{"invoice_number":{"type":["string","null"]},"total":{"type":["number","null"]}},"required":["invoice_number","total"],"additionalProperties":false},
+  "required_checks": ["json_schema", "source_support"],
+  "allow_abstention": true, "min_quality": 0.84, "max_source_chars": 24000
+}
