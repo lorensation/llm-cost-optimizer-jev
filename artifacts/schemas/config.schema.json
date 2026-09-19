@@ -1,0 +1,182 @@
+{
+  "$defs": {
+    "ModelConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "input_microusd_per_million": {
+          "minimum": 0,
+          "title": "Input Microusd Per Million",
+          "type": "integer"
+        },
+        "output_microusd_per_million": {
+          "minimum": 0,
+          "title": "Output Microusd Per Million",
+          "type": "integer"
+        },
+        "context_tokens": {
+          "exclusiveMinimum": 0,
+          "title": "Context Tokens",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "model_id",
+        "provider",
+        "input_microusd_per_million",
+        "output_microusd_per_million",
+        "context_tokens"
+      ],
+      "title": "ModelConfig",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "default": "fixture",
+      "enum": [
+        "fixture",
+        "shadow",
+        "active"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "database_url": {
+      "default": "sqlite:///data/autopilot.db",
+      "title": "Database Url",
+      "type": "string"
+    },
+    "bind_host": {
+      "default": "127.0.0.1",
+      "title": "Bind Host",
+      "type": "string"
+    },
+    "policy_id": {
+      "title": "Policy Id",
+      "type": "string"
+    },
+    "decision_transport": {
+      "enum": [
+        "openrouter_decisions",
+        "typesafe_direct",
+        "local"
+      ],
+      "title": "Decision Transport",
+      "type": "string"
+    },
+    "decision_model": {
+      "title": "Decision Model",
+      "type": "string"
+    },
+    "request_budget_microusd": {
+      "exclusiveMinimum": 0,
+      "title": "Request Budget Microusd",
+      "type": "integer"
+    },
+    "deadline_ms": {
+      "exclusiveMinimum": 0,
+      "title": "Deadline Ms",
+      "type": "integer"
+    },
+    "max_output_tokens": {
+      "exclusiveMinimum": 0,
+      "title": "Max Output Tokens",
+      "type": "integer"
+    },
+    "max_generations": {
+      "default": 2,
+      "maximum": 2,
+      "minimum": 1,
+      "title": "Max Generations",
+      "type": "integer"
+    },
+    "decision_reserve_microusd": {
+      "default": 100,
+      "minimum": 0,
+      "title": "Decision Reserve Microusd",
+      "type": "integer"
+    },
+    "audit_probability": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Audit Probability",
+      "type": "number"
+    },
+    "contracts_dir": {
+      "format": "path",
+      "title": "Contracts Dir",
+      "type": "string"
+    },
+    "profiles_path": {
+      "format": "path",
+      "title": "Profiles Path",
+      "type": "string"
+    },
+    "models": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ModelConfig"
+      },
+      "title": "Models",
+      "type": "object"
+    },
+    "openrouter_api_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Openrouter Api Key"
+    },
+    "typesafe_api_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Typesafe Api Key"
+    },
+    "api_key": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Api Key"
+    }
+  },
+  "required": [
+    "policy_id",
+    "decision_transport",
+    "decision_model",
+    "request_budget_microusd",
+    "deadline_ms",
+    "max_output_tokens",
+    "audit_probability",
+    "contracts_dir",
+    "profiles_path",
+    "models"
+  ],
+  "title": "AppConfig",
+  "type": "object"
+}

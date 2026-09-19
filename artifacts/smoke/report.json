@@ -1,0 +1,44 @@
+{
+  "mode": "fixture",
+  "generation": {
+    "status": "succeeded",
+    "content": {
+      "invoice_number": "F-104",
+      "total": 120.0
+    },
+    "requested_model": "fixture/economy",
+    "resolved_model": "fixture/economy",
+    "provider": "fixture",
+    "input_tokens": 5,
+    "output_tokens": 4,
+    "cost_microusd": 0,
+    "latency_ms": 1,
+    "error_code": null,
+    "raw": {
+      "synthetic": true
+    }
+  },
+  "decision": {
+    "status": "succeeded",
+    "content": {
+      "supported": {
+        "type": "noul",
+        "noul": 0.95
+      }
+    },
+    "requested_model": "fixture/jev",
+    "resolved_model": "fixture/jev",
+    "provider": "fixture",
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "cost_microusd": 0,
+    "latency_ms": 1,
+    "error_code": null,
+    "raw": {
+      "synthetic": true
+    }
+  },
+  "cost_microusd": 0,
+  "complete_cost": true,
+  "notice": "Fixture data is synthetic and not a provider benchmark."
+}

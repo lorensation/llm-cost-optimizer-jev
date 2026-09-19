@@ -1,0 +1,33 @@
+mode: fixture
+database_url: sqlite:///data/autopilot.db
+bind_host: 127.0.0.1
+policy_id: fixture-v1
+decision_transport: openrouter_decisions
+decision_model: typesafe/jev-1.13
+request_budget_microusd: 50000
+deadline_ms: 30000
+max_output_tokens: 512
+max_generations: 2
+decision_reserve_microusd: 100
+audit_probability: 0.1
+contracts_dir: contracts
+profiles_path: config/profiles.json
+models:
+  economy:
+    model_id: fixture/economy
+    provider: fixture
+    input_microusd_per_million: 100000
+    output_microusd_per_million: 400000
+    context_tokens: 16000
+  balanced:
+    model_id: fixture/balanced
+    provider: fixture
+    input_microusd_per_million: 300000
+    output_microusd_per_million: 1200000
+    context_tokens: 32000
+  strong:
+    model_id: fixture/strong
+    provider: fixture
+    input_microusd_per_million: 1000000
+    output_microusd_per_million: 4000000
+    context_tokens: 64000
