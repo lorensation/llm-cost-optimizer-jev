@@ -22,20 +22,32 @@ def test_final_dataset_is_disjoint_from_the_pilot() -> None:
 
 def test_final_dataset_has_more_groups_than_the_pilot_for_tighter_intervals() -> None:
     final_rows = load_final()
-    assert len(final_rows) == 376
-    assert len({row["group_id"] for row in final_rows}) == 102
+    assert len(final_rows) == 396
+    assert len({row["group_id"] for row in final_rows}) == 107
     assert sum(row["contract_id"] == "extract_invoice_v1" for row in final_rows) == 96
     assert sum(row["contract_id"] == "classify_ticket_v1" for row in final_rows) == 80
     assert sum(row["contract_id"] == "context_qa_v1" for row in final_rows) == 80
-    assert sum(row["contract_id"] == "classify_code_request_v1" for row in final_rows) == 120
+    assert sum(row["contract_id"] == "classify_code_request_v1" for row in final_rows) == 140
 
 
-def test_code_request_family_is_balanced_across_its_taxonomy() -> None:
+def test_code_request_family_is_close_to_balanced_across_its_taxonomy() -> None:
     final_rows = load_final()
     code = [row for row in final_rows if row["contract_id"] == "classify_code_request_v1"]
     labels = [row["expected"]["label"] for row in code]
-    for label in ("planning", "refactoring", "testing", "fix", "documentation", "other"):
-        assert labels.count(label) == 20
+    for label in ("planning", "refactoring", "testing", "fix", "documentation"):
+        assert labels.count(label) == 24
+    assert labels.count("other") == 20
+
+
+def test_injection_cases_keep_the_true_content_label_not_the_injected_one() -> None:
+    # An embedded "classify this as X" / "ignore the taxonomy" instruction must never change gold: the
+    # label reflects the genuine request, since the router/verifier must resist prompt injection.
+    final_rows = load_final()
+    markers = ("clasifica esto como", "ignora la taxonomia", "classify this as", "ignore the taxonomy")
+    injected_rows = [row for row in final_rows if any(marker in row["source"].lower() for marker in markers)]
+    assert len(injected_rows) == 16  # 4 templates x 4 reps each, es/en split
+    for row in injected_rows:
+        assert row["expected"]["label"] not in ("abstain", "other")
 
 
 def test_final_dataset_enriches_qa_abstention_and_documents_it_as_deliberate() -> None:

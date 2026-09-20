@@ -36,6 +36,24 @@ def test_bootstrap_profiles_cannot_be_marked_active(tmp_path, monkeypatch) -> No
         load_config(path)
 
 
+def test_final_routing_config_resolves_all_four_task_families() -> None:
+    config = load_config("config/routing-claude-final.yaml")
+    contracts = load_contracts(config.contracts_dir)
+    _, profiles = load_profiles(config.profiles_path, contracts, config.models)
+    router = RoutingPolicy(config.models, profiles)
+    assert set(contracts) == {
+        "extract_invoice_v1", "classify_ticket_v1", "context_qa_v1", "classify_code_request_v1",
+    }
+    for contract_id, contract in contracts.items():
+        route = router.select(contract, config.request_budget_microusd, config.deadline_ms)
+        assert route.primary in config.models
+    # The code-request pilot is small (n=36); only "strong" clears the 0.85 floor with a real Wilson
+    # lower bound, so live selection honestly falls back to it instead of a cheaper unqualified tier.
+    code_route = router.select(contracts["classify_code_request_v1"], config.request_budget_microusd, config.deadline_ms)
+    assert code_route.primary == "strong"
+    assert code_route.fallback is None
+
+
 def test_catalog_snapshot_matches_configured_rates() -> None:
     config = load_config("config/real-smoke.yaml")
     snapshot = json.loads(Path("config/model-snapshots/openrouter-claude-2026-09-20.json").read_text(encoding="utf-8"))

@@ -1,0 +1,155 @@
+{
+  "version": "claude-final-merged-2026-09-20",
+  "validated_for_active": false,
+  "sources": [
+    {
+      "label": "profiles-claude-pilot",
+      "dataset_sha256": "372a55fae24adc71a05b28df1def9b429955ecb7d02e7ca0f80222a1299da1ac",
+      "results_sha256": "26bcc33c7f25c7b67048dc5ed95c2246983744fcb482a4eb3e99ad4b6c5a339c",
+      "results_file_sha256": "1d946a70819269b19dfda839ac09fe9a5d1e57435605fce2e42cacb4517fb0d1",
+      "config_sha256": "fd4ed9219936249f62b1b97b5b5f452e8e4594f8a81bdf1e917354ea91aa5e65",
+      "evaluator_sha256": "cba1ffca8879140b0409c5d9d6cffb775ca2b6fa44e700f242500caf7ecc220d"
+    },
+    {
+      "label": "profiles-code-request",
+      "dataset_sha256": "09f2ef7ff137ece795e8cc4e0f7430ba4ab2ced0a0b2b4fea40350ea0ddeca1d",
+      "results_sha256": "8c7ef56c35ddd2f6e9818081a3c226991f86e63b81c9e6617f77309c39b967ae",
+      "results_file_sha256": "511029830b93ed357797a7f8c9e1ec0f7a8751ba54e3864a9a10f02b477d50af",
+      "config_sha256": "fd4ed9219936249f62b1b97b5b5f452e8e4594f8a81bdf1e917354ea91aa5e65",
+      "evaluator_sha256": "e755791bb0bd906a3dc62b0836343f1b6eb13d15ebd6fe2fae3338f27fa11c0c"
+    }
+  ],
+  "experiment": {
+    "provider": "openrouter",
+    "temperature": 0,
+    "max_output_tokens": 256,
+    "models": {
+      "economy": "anthropic/claude-haiku-4.5",
+      "balanced": "anthropic/claude-sonnet-5",
+      "strong": "anthropic/claude-opus-5"
+    }
+  },
+  "profiles": [
+    {
+      "contract_id": "classify_ticket_v1",
+      "model_alias": "balanced",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4636,
+      "expected_cost_microusd": 1333,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "classify_ticket_v1",
+      "model_alias": "economy",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 1508,
+      "expected_cost_microusd": 388,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "classify_ticket_v1",
+      "model_alias": "strong",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4870,
+      "expected_cost_microusd": 3056,
+      "qualified_fallback": true
+    },
+    {
+      "contract_id": "context_qa_v1",
+      "model_alias": "balanced",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4317,
+      "expected_cost_microusd": 1815,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "context_qa_v1",
+      "model_alias": "economy",
+      "successes": 24,
+      "sample_size": 30,
+      "quality_lower_bound": 0.62694,
+      "p95_latency_ms": 2303,
+      "expected_cost_microusd": 568,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "context_qa_v1",
+      "model_alias": "strong",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4460,
+      "expected_cost_microusd": 5167,
+      "qualified_fallback": true
+    },
+    {
+      "contract_id": "extract_invoice_v1",
+      "model_alias": "balanced",
+      "successes": 40,
+      "sample_size": 40,
+      "quality_lower_bound": 0.912375,
+      "p95_latency_ms": 2864,
+      "expected_cost_microusd": 1073,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "extract_invoice_v1",
+      "model_alias": "economy",
+      "successes": 40,
+      "sample_size": 40,
+      "quality_lower_bound": 0.912375,
+      "p95_latency_ms": 1725,
+      "expected_cost_microusd": 435,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "extract_invoice_v1",
+      "model_alias": "strong",
+      "successes": 40,
+      "sample_size": 40,
+      "quality_lower_bound": 0.912375,
+      "p95_latency_ms": 2913,
+      "expected_cost_microusd": 2691,
+      "qualified_fallback": true
+    },
+    {
+      "contract_id": "classify_code_request_v1",
+      "model_alias": "balanced",
+      "successes": 34,
+      "sample_size": 36,
+      "quality_lower_bound": 0.81855,
+      "p95_latency_ms": 4167,
+      "expected_cost_microusd": 1426,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "classify_code_request_v1",
+      "model_alias": "economy",
+      "successes": 32,
+      "sample_size": 36,
+      "quality_lower_bound": 0.746849,
+      "p95_latency_ms": 1866,
+      "expected_cost_microusd": 485,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "classify_code_request_v1",
+      "model_alias": "strong",
+      "successes": 35,
+      "sample_size": 36,
+      "quality_lower_bound": 0.8583,
+      "p95_latency_ms": 5835,
+      "expected_cost_microusd": 3961,
+      "qualified_fallback": true
+    }
+  ],
+  "notice": "Merged from separate pilot measurements listed in 'sources'. Not an untouched final test and not validated for active routing."
+}

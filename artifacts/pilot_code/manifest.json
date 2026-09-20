@@ -1,0 +1,17 @@
+{
+  "mode": "real",
+  "cases": 36,
+  "models": [
+    "economy",
+    "balanced",
+    "strong"
+  ],
+  "expected_rows": 108,
+  "observed_rows": 108,
+  "dataset_sha256": "09f2ef7ff137ece795e8cc4e0f7430ba4ab2ced0a0b2b4fea40350ea0ddeca1d",
+  "results_sha256": "8c7ef56c35ddd2f6e9818081a3c226991f86e63b81c9e6617f77309c39b967ae",
+  "preflight_microusd_for_pending": 0,
+  "actual_spend_microusd": 211317,
+  "complete_cost": true,
+  "completed_at": "2026-09-20T12:18:38.774448+00:00"
+}
