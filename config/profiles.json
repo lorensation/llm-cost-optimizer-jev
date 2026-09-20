@@ -1,5 +1,6 @@
 {
   "version": "fixture-v1",
+  "validated_for_active": false,
   "profiles": [
     {"contract_id":"extract_invoice_v1","model_alias":"economy","successes":90,"sample_size":100,"quality_lower_bound":0.84,"p95_latency_ms":500,"expected_cost_microusd":120,"qualified_fallback":false},
     {"contract_id":"extract_invoice_v1","model_alias":"strong","successes":98,"sample_size":100,"quality_lower_bound":0.95,"p95_latency_ms":1200,"expected_cost_microusd":900,"qualified_fallback":true},
@@ -10,4 +11,3 @@
   ],
   "notice": "Synthetic fixture profiles. They are not measured provider results and cannot enable active production routing."
 }
-

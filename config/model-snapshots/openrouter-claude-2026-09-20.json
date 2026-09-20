@@ -1,0 +1,13 @@
+{
+  "source": "https://openrouter.ai/api/v1/models",
+  "observed_at": "2026-09-20",
+  "currency": "USD",
+  "pricing_unit": "per_token",
+  "models": [
+    {"alias":"economy","id":"anthropic/claude-haiku-4.5","name":"Anthropic: Claude Haiku 4.5","context_length":200000,"pricing":{"prompt":"0.000001","completion":"0.000005"},"required_parameters_observed":["max_tokens","response_format","structured_outputs"]},
+    {"alias":"balanced","id":"anthropic/claude-sonnet-5","name":"Anthropic: Claude Sonnet 5","context_length":1000000,"pricing":{"prompt":"0.000002","completion":"0.00001"},"required_parameters_observed":["max_tokens","response_format","structured_outputs"]},
+    {"alias":"strong","id":"anthropic/claude-opus-5","name":"Anthropic: Claude Opus 5","context_length":1000000,"pricing":{"prompt":"0.000005","completion":"0.000025"},"required_parameters_observed":["max_tokens","response_format","structured_outputs"]}
+  ],
+  "warning": "Catalog data is time-sensitive. Refresh before every pilot or promotion run."
+}
+

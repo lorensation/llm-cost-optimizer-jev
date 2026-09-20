@@ -87,6 +87,10 @@ def load_config(path: str | Path | None = None) -> AppConfig:
     config = AppConfig.model_validate(raw)
     if not config.contracts_dir.exists() or not config.profiles_path.exists():
         raise ValueError("contract/profile reference does not exist")
+    if config.mode == "active":
+        profile_manifest = json.loads(config.profiles_path.read_text(encoding="utf-8"))
+        if profile_manifest.get("validated_for_active") is not True:
+            raise ValueError("active mode requires a profile manifest validated_for_active=true")
     return config
 
 

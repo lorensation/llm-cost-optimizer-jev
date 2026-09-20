@@ -1,0 +1,47 @@
+{
+  "mode": "real",
+  "model_alias": "strong",
+  "decision_transport": "openrouter_decisions",
+  "preflight_estimate_microusd": 13640,
+  "generation": {
+    "status": "succeeded",
+    "content": {
+      "invoice_number": "F-104",
+      "total": 120
+    },
+    "requested_model": "anthropic/claude-opus-5",
+    "resolved_model": "anthropic/claude-opus-5",
+    "provider": "Claude Platform on AWS",
+    "input_tokens": 307,
+    "output_tokens": 19,
+    "cost_microusd": 2010,
+    "latency_ms": 2161,
+    "error_code": null,
+    "raw": {
+      "id": "gen-1789895620-VaB0ItqWZfSlGHep2oJY"
+    }
+  },
+  "decision": {
+    "status": "succeeded",
+    "content": {
+      "supported": {
+        "type": "noul",
+        "noul": 0.87
+      }
+    },
+    "requested_model": "typesafe/jev-1.13",
+    "resolved_model": "typesafe/jev-1.13-20260917",
+    "provider": "TypeSafe",
+    "input_tokens": 338,
+    "output_tokens": 20,
+    "cost_microusd": 14,
+    "latency_ms": 362,
+    "error_code": null,
+    "raw": {
+      "id": "gen-dec-1789895622-FuNocXJm2rTFdakuVDBd"
+    }
+  },
+  "cost_microusd": 2024,
+  "complete_cost": true,
+  "notice": "Real smoke only; not calibration."
+}

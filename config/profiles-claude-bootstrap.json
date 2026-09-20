@@ -1,0 +1,14 @@
+{
+  "version": "claude-bootstrap-2026-09-20",
+  "validated_for_active": false,
+  "profiles": [
+    {"contract_id":"extract_invoice_v1","model_alias":"economy","successes":0,"sample_size":1,"quality_lower_bound":0.84,"p95_latency_ms":15000,"expected_cost_microusd":1640,"qualified_fallback":false},
+    {"contract_id":"extract_invoice_v1","model_alias":"strong","successes":0,"sample_size":1,"quality_lower_bound":0.95,"p95_latency_ms":30000,"expected_cost_microusd":8200,"qualified_fallback":true},
+    {"contract_id":"classify_ticket_v1","model_alias":"economy","successes":0,"sample_size":1,"quality_lower_bound":0.85,"p95_latency_ms":15000,"expected_cost_microusd":1320,"qualified_fallback":false},
+    {"contract_id":"classify_ticket_v1","model_alias":"strong","successes":0,"sample_size":1,"quality_lower_bound":0.95,"p95_latency_ms":30000,"expected_cost_microusd":6600,"qualified_fallback":true},
+    {"contract_id":"context_qa_v1","model_alias":"economy","successes":0,"sample_size":1,"quality_lower_bound":0.00,"p95_latency_ms":15000,"expected_cost_microusd":1640,"qualified_fallback":false},
+    {"contract_id":"context_qa_v1","model_alias":"balanced","successes":0,"sample_size":1,"quality_lower_bound":0.88,"p95_latency_ms":20000,"expected_cost_microusd":3280,"qualified_fallback":false},
+    {"contract_id":"context_qa_v1","model_alias":"strong","successes":0,"sample_size":1,"quality_lower_bound":0.95,"p95_latency_ms":30000,"expected_cost_microusd":8200,"qualified_fallback":true}
+  ],
+  "notice": "Bootstrap routing shape only. Success, quality and latency values are unmeasured placeholders. Never use this file with mode=active; phase 2 must replace it with measured profiles."
+}

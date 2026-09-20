@@ -1,0 +1,47 @@
+{
+  "mode": "real",
+  "model_alias": "economy",
+  "decision_transport": "openrouter_decisions",
+  "preflight_estimate_microusd": 2888,
+  "generation": {
+    "status": "succeeded",
+    "content": {
+      "invoice_number": "F-104",
+      "total": 120
+    },
+    "requested_model": "anthropic/claude-haiku-4.5",
+    "resolved_model": "anthropic/claude-haiku-4.5",
+    "provider": "Amazon Bedrock",
+    "input_tokens": 239,
+    "output_tokens": 19,
+    "cost_microusd": 334,
+    "latency_ms": 1185,
+    "error_code": null,
+    "raw": {
+      "id": "gen-1789895608-k0dkUU2zo4lttDeCbNz8"
+    }
+  },
+  "decision": {
+    "status": "succeeded",
+    "content": {
+      "supported": {
+        "type": "noul",
+        "noul": 0.88
+      }
+    },
+    "requested_model": "typesafe/jev-1.13",
+    "resolved_model": "typesafe/jev-1.13-20260917",
+    "provider": "TypeSafe",
+    "input_tokens": 338,
+    "output_tokens": 20,
+    "cost_microusd": 14,
+    "latency_ms": 404,
+    "error_code": null,
+    "raw": {
+      "id": "gen-dec-1789895609-nX3yOnxvspPXB4sxcja5"
+    }
+  },
+  "cost_microusd": 348,
+  "complete_cost": true,
+  "notice": "Real smoke only; not calibration."
+}
