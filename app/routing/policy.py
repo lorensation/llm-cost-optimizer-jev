@@ -15,6 +15,9 @@ class Route:
     primary: str
     fallback: str | None
     expected_cost_microusd: int
+    expected_trajectory_cost_microusd: int
+    escalation_probability_assumed: float
+    escalation_assumption_source: str
     reasons: tuple[str, ...]
     discarded: tuple[str, ...]
 
@@ -48,6 +51,17 @@ class RoutingPolicy:
         candidates.sort(key=lambda item: (item.expected_cost_microusd, -item.quality_lower_bound, item.model_alias))
         primary = candidates[0]
         fallback_candidates = [p for p in candidates if p.qualified_fallback and p.model_alias != primary.model_alias]
-        fallback = min(fallback_candidates, key=lambda item: item.expected_cost_microusd).model_alias if fallback_candidates else None
-        return Route(primary.model_alias, fallback, primary.expected_cost_microusd, ("measured_profile", "minimum_expected_cost"), tuple(discarded))
+        fallback_profile = min(fallback_candidates, key=lambda item: item.expected_cost_microusd) if fallback_candidates else None
+        if fallback_profile is None:
+            escalation_probability, escalation_source = 0.0, "no_fallback_available"
+            trajectory_cost = primary.expected_cost_microusd
+        else:
+            # No measured escalation rate exists yet (phase 3 has no live routing traffic). Use the
+            # complement of the primary's Wilson lower bound as a conservative *upper* bound on how
+            # often escalation is needed, per PLAN section 5: label estimates explicitly, never invent them.
+            escalation_probability, escalation_source = round(1 - primary.quality_lower_bound, 6), "conservative_no_escalation_data"
+            trajectory_cost = primary.expected_cost_microusd + round(escalation_probability * fallback_profile.expected_cost_microusd)
+        fallback = fallback_profile.model_alias if fallback_profile else None
+        return Route(primary.model_alias, fallback, primary.expected_cost_microusd, trajectory_cost,
+                     escalation_probability, escalation_source, ("measured_profile", "minimum_expected_cost"), tuple(discarded))
 
