@@ -22,14 +22,26 @@ class OpenRouterProvider:
             response = await self.client.post("/api/v1/chat/completions", json=payload, headers={"Authorization":f"Bearer {self.api_key}"}, timeout=timeout_s)
             response.raise_for_status()
             raw = response.json()
-            usage = raw.get("usage", {})
-            content = json.loads(raw["choices"][0]["message"]["content"])
-            cost = usage.get("cost")
-            return CallResult(status="succeeded", content=content, requested_model=model, resolved_model=raw.get("model"), provider=raw.get("provider"), input_tokens=usage.get("prompt_tokens"), output_tokens=usage.get("completion_tokens"), cost_microusd=usd_to_microusd(cost) if cost is not None else None, latency_ms=int((time.perf_counter()-started)*1000), raw={"id":raw.get("id")})
         except httpx.TimeoutException:
             return CallResult(status="unknown", requested_model=model, latency_ms=int((time.perf_counter()-started)*1000), error_code="timeout")
-        except (httpx.HTTPError, KeyError, ValueError) as exc:
+        except httpx.HTTPError as exc:
             return CallResult(status="failed", requested_model=model, latency_ms=int((time.perf_counter()-started)*1000), error_code=type(exc).__name__)
+        # Cost/usage come from the response envelope, independent of whether the message content parses.
+        # A refusal or an empty completion still bills; never report a known cost as "unknown" for that.
+        usage = raw.get("usage", {}) if isinstance(raw, dict) else {}
+        cost = usage.get("cost")
+        common = dict(requested_model=model, resolved_model=raw.get("model"), provider=raw.get("provider"),
+                      input_tokens=usage.get("prompt_tokens"), output_tokens=usage.get("completion_tokens"),
+                      cost_microusd=usd_to_microusd(cost) if cost is not None else None,
+                      latency_ms=int((time.perf_counter()-started)*1000), raw={"id": raw.get("id") if isinstance(raw, dict) else None})
+        try:
+            raw_content = raw["choices"][0]["message"]["content"]
+            if raw_content is None:
+                raise ValueError("model returned no content")
+            content = json.loads(raw_content)
+        except (KeyError, TypeError, ValueError) as exc:
+            return CallResult(status="failed", **common, error_code=type(exc).__name__)
+        return CallResult(status="succeeded", content=content, **common)
 
 
 class OpenRouterDecisions:
@@ -43,9 +55,18 @@ class OpenRouterDecisions:
             response = await self.client.post("/api/alpha/decisions", json={"model":self.model,"state":state,"questions":questions}, headers={"Authorization":f"Bearer {self.api_key}"}, timeout=timeout_s)
             response.raise_for_status()
             raw = response.json()
-            usage = raw.get("usage", {})
-            return CallResult(status="succeeded", content=raw["answers"], requested_model=self.model, resolved_model=raw.get("model"), provider=raw.get("provider"), input_tokens=usage.get("input_tokens"), output_tokens=usage.get("output_tokens"), cost_microusd=usd_to_microusd(usage["cost"]) if usage.get("cost") is not None else None, latency_ms=int((time.perf_counter()-started)*1000), raw={"id":raw.get("id")})
         except httpx.TimeoutException:
             return CallResult(status="unknown", requested_model=self.model, latency_ms=int((time.perf_counter()-started)*1000), error_code="timeout")
-        except (httpx.HTTPError, KeyError, ValueError) as exc:
+        except httpx.HTTPError as exc:
             return CallResult(status="failed", requested_model=self.model, latency_ms=int((time.perf_counter()-started)*1000), error_code=type(exc).__name__)
+        usage = raw.get("usage", {}) if isinstance(raw, dict) else {}
+        cost = usage.get("cost")
+        common = dict(requested_model=self.model, resolved_model=raw.get("model"), provider=raw.get("provider"),
+                      input_tokens=usage.get("input_tokens"), output_tokens=usage.get("output_tokens"),
+                      cost_microusd=usd_to_microusd(cost) if cost is not None else None,
+                      latency_ms=int((time.perf_counter()-started)*1000), raw={"id": raw.get("id") if isinstance(raw, dict) else None})
+        try:
+            answers = raw["answers"]
+        except (KeyError, TypeError) as exc:
+            return CallResult(status="failed", **common, error_code=type(exc).__name__)
+        return CallResult(status="succeeded", content=answers, **common)
