@@ -20,6 +20,11 @@ from app.providers.fixture import FixtureProvider
 from app.providers.openrouter import OpenRouterProvider
 
 ALIASES = ("economy", "balanced", "strong")
+PROPOSED_ROUTE = {
+    "extract_invoice_v1": "economy",
+    "classify_ticket_v1": "economy",
+    "context_qa_v1": "balanced",
+}
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -206,7 +211,9 @@ def summarize(cases: dict[str, dict[str, Any]], rows: list[dict[str, Any]]) -> d
 
 def build_report(args: argparse.Namespace) -> None:
     case_rows, rows = read_jsonl(args.input), read_jsonl(args.results)
-    summary = summarize({row["id"]: row for row in case_rows}, rows)
+    cases = {row["id"]: row for row in case_rows}
+    summary = summarize(cases, rows)
+    contracts = load_contracts(Path("contracts"))
     lines = ["# Claude pilot report", "", f"Dataset SHA-256: `{file_hash(args.input)}`.", "",
              "> Real provider measurements on a synthetic pilot. This is not an untouched final test.", "",
              "| contract | model | n | success | Wilson lower 95% | cost µUSD | cost/success | p95 ms | errors |",
@@ -215,8 +222,77 @@ def build_report(args: argparse.Namespace) -> None:
         per_success = item["total_cost_microusd"] / item["successes"] if item["successes"] else math.inf
         lines.append(f"| {contract_id} | {alias} | {item['sample_size']} | {item['success_rate']:.3f} | {item['quality_lower_bound']:.3f} | {item['total_cost_microusd']} | {per_success:.1f} | {item['p95_latency_ms']} | {item['errors']} |")
     total_cost = sum((row.get("cost_microusd") or 0) for row in rows)
-    lines += ["", f"Total measured generation cost: **{total_cost} micro-USD (${total_cost / 1_000_000:.6f})**.",
-              "", "Failure details remain in the JSONL manifest; gold labels were not sent to providers."]
+    fixed: dict[str, dict[str, int]] = {}
+    for alias in ALIASES:
+        selected = [row for row in rows if row["model_alias"] == alias]
+        fixed[alias] = {
+            "successes": sum(bool(row["success"]) for row in selected),
+            "cost": sum(int(row.get("cost_microusd") or 0) for row in selected),
+        }
+    routed = [row for row in rows if PROPOSED_ROUTE.get(row["contract_id"]) == row["model_alias"]]
+    routed_successes = sum(bool(row["success"]) for row in routed)
+    routed_cost = sum(int(row.get("cost_microusd") or 0) for row in routed)
+    acceptable: dict[str, bool] = {}
+    for alias in ALIASES:
+        acceptable[alias] = all(
+            summary[(contract_id, alias)]["quality_lower_bound"] >= contract.min_quality
+            for contract_id, contract in contracts.items()
+        )
+    route_acceptable = all(
+        summary[(contract_id, alias)]["quality_lower_bound"] >= contracts[contract_id].min_quality
+        for contract_id, alias in PROPOSED_ROUTE.items()
+    )
+    balanced_cost = fixed["balanced"]["cost"]
+    break_even = (balanced_cost - routed_cost) / len(case_rows)
+    failures = [row for row in rows if not row["success"]]
+    failure_groups = {cases[row["case_id"]]["group_id"] for row in failures}
+    group_count = len({case["group_id"] for case in case_rows})
+
+    lines += [
+        "", f"Total measured generation cost: **{total_cost} micro-USD (${total_cost / 1_000_000:.6f})**.",
+        "", "## Fixed baselines and routing opportunity", "",
+        "| policy | successes | generation cost µUSD | cost/success µUSD | meets every contract floor |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for alias in ALIASES:
+        item = fixed[alias]
+        per_success = item["cost"] / item["successes"] if item["successes"] else math.inf
+        lines.append(
+            f"| fixed {alias} | {item['successes']}/{len(case_rows)} | {item['cost']} | "
+            f"{per_success:.1f} | {'yes' if acceptable[alias] else 'no'} |"
+        )
+    route_description = "economy extraction/classification + balanced Q&A"
+    route_per_success = routed_cost / routed_successes if routed_successes else math.inf
+    lines.append(
+        f"| proposed contract route | {routed_successes}/{len(case_rows)} | {routed_cost} | "
+        f"{route_per_success:.1f} | {'yes' if route_acceptable else 'no'} |"
+    )
+    saving = 1 - routed_cost / balanced_cost
+    lines += [
+        "", f"The proposed route ({route_description}) costs **{saving:.1%} less** than the cheapest acceptable "
+        f"fixed baseline (balanced) before routing, verification, and audit overhead.",
+        f"Its break-even overhead is **{break_even:.1f} micro-USD per request** on this 100-case mix.",
+        "", "| added overhead per request µUSD | net cost µUSD | saving vs fixed balanced |",
+        "|---:|---:|---:|",
+    ]
+    for overhead in (0, 100, 250, 500):
+        net_cost = routed_cost + overhead * len(case_rows)
+        net_saving = 1 - net_cost / balanced_cost
+        lines.append(f"| {overhead} | {net_cost} | {net_saving:.1%} |")
+    lines += [
+        "", "## Failure concentration and limitations", "",
+        f"- {len(failures)} failures occurred across {len(failure_groups)} source/template groups; all were economy "
+        "Q&A abstention-flag mismatches. The answers stated that evidence was absent but returned `abstained: false`.",
+        f"- The 100 synthetic cases contain {group_count} source/template groups. Case-level Wilson intervals therefore "
+        "overstate independent evidence and are retained only as provisional profile inputs.",
+        "- Generation cost is measured billing. Routing, verification, and audit overhead above is sensitivity analysis, "
+        "not billed savings. Gold labels were never sent to providers.",
+        "", "## Decision", "",
+        "**`continue_router`**, limited to shadow experimentation. The pilot shows a contract-level cost/quality "
+        "difference that can beat fixed Sonnet within the measured overhead envelope. A simple contract rule already "
+        "captures this opportunity, so phase 3 must measure whether Jev improves on that rule; this pilot does not "
+        "justify active routing or a claim that Jev adds value.",
+    ]
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -224,6 +300,7 @@ def build_report(args: argparse.Namespace) -> None:
 def build_profiles(args: argparse.Namespace) -> None:
     case_rows, rows = read_jsonl(args.input), read_jsonl(args.results)
     summary = summarize({row["id"]: row for row in case_rows}, rows)
+    config = load_config(args.config)
     profiles = [{
         "contract_id": contract_id, "model_alias": alias, "successes": item["successes"],
         "sample_size": item["sample_size"], "quality_lower_bound": round(item["quality_lower_bound"], 6),
@@ -232,7 +309,12 @@ def build_profiles(args: argparse.Namespace) -> None:
     } for (contract_id, alias), item in sorted(summary.items())]
     payload = {
         "version": f"claude-pilot-{datetime.now(UTC).date().isoformat()}", "validated_for_active": False,
-        "dataset_sha256": file_hash(args.input), "results_sha256": canonical_json_hash(rows),
+        "dataset_sha256": file_hash(args.input), "results_sha256": file_hash(args.results),
+        "config_sha256": file_hash(Path(args.config)), "evaluator_sha256": file_hash(Path(__file__)),
+        "experiment": {
+            "provider": "openrouter", "temperature": 0, "max_output_tokens": config.max_output_tokens,
+            "models": {alias: model.model_id for alias, model in config.models.items()},
+        },
         "profiles": profiles,
         "notice": "Measured on the synthetic phase 2 pilot. Not an untouched final test and not validated for active routing."
     }
@@ -254,10 +336,12 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--max-budget-microusd", type=int)
     run.add_argument("--concurrency", type=int, default=4)
     report = commands.add_parser("report")
+    report.add_argument("--config", default="config/pilot-claude.yaml")
     report.add_argument("--input", type=Path, default=Path("data/pilot.jsonl"))
     report.add_argument("--results", type=Path, required=True)
     report.add_argument("--output", type=Path, required=True)
     profiles = commands.add_parser("profiles")
+    profiles.add_argument("--config", default="config/pilot-claude.yaml")
     profiles.add_argument("--input", type=Path, default=Path("data/pilot.jsonl"))
     profiles.add_argument("--results", type=Path, required=True)
     profiles.add_argument("--output", type=Path, required=True)

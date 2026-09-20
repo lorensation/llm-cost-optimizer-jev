@@ -16,7 +16,7 @@ The catalog snapshot in `config/model-snapshots/openrouter-claude-2026-09-20.jso
 | `balanced` | `anthropic/claude-sonnet-5` | Context Q&A primary |
 | `strong` | `anthropic/claude-opus-5` | Qualified fallback |
 
-This is a bootstrap shape, not a quality result. `config/profiles-claude-bootstrap.json` is explicitly blocked from active mode. Phase 2 must replace its placeholder quality, cost, and latency fields with measurements.
+The bootstrap shape has now been measured in phase 2. `config/profiles-claude-pilot.json` contains the provisional success bounds, latency, cost, experiment settings, and data/config/evaluator/result hashes. It remains explicitly blocked from active mode because this synthetic pilot is not an untouched final test.
 
 Jev uses `openrouter_decisions` for the first smoke because the OpenRouter response includes billed cost. The TypeSafe direct key remains available for a later paired transport experiment; direct and gateway model identifiers must not be treated as interchangeable.
 
@@ -52,16 +52,20 @@ For each report confirm:
 
 Then record the observed model/provider IDs, costs, latency, date, transport, and any mismatch in `docs/provider-contracts.md`, `docs/decisions.md`, and `docs/progress.md`. A smoke validates connectivity and response contracts only; it does not qualify a model.
 
-## Enter phase 2
+## Phase 2 result
 
-1. Freeze the three model IDs, generation settings, contracts, rubrics, language mix, and pilot budget.
-2. Build 100–200 reviewed cases in `data/pilot.jsonl`, grouped by source/template. Include missing values, ambiguity, Spanish and English, and adversarial instructions embedded in source data.
-3. Keep gold labels outside all production prompts and verifier state.
-4. Add a resumable pilot runner. The current `scripts/benchmark.py` only reduces an existing result manifest; it does not call providers.
-5. Run Haiku, Sonnet, and Opus on the same eligible cases. Persist every output, error, latency, resolved model/provider, tokens, and billed/unknown cost.
-6. Evaluate deterministic format separately from semantic correctness and source support.
-7. Produce measured profiles per contract/model with sample size, success interval, p95 latency, expected route cost, data/rubric hashes, and experiment conditions.
-8. Compare fixed Haiku, fixed Sonnet, fixed Opus, and the proposed routing opportunity with estimated verification/audit overhead clearly separated.
-9. Decide `continue_router`, `simplify_fixed_model`, or `insufficient_evidence`.
+The canary covered 20 cases and 60 generations for $0.104678. The resumed full run covered all 100 cases and 300 case/model pairs for $0.537627, with complete billing and no provider errors. The detailed evidence is in `artifacts/pilot/report.md`.
 
-Do not set `mode: active` in phase 2. The next operational mode is a true fixed-baseline shadow implementation, which must be completed before serving routed recommendations.
+The decision is `continue_router` in shadow only. Fixed Sonnet was the cheapest acceptable fixed baseline. Haiku for extraction/classification plus Sonnet for Q&A matched its observed 100/100 successes while reducing measured generation cost by 39.2% before overhead. The six Haiku failures were all Q&A abstention-flag errors.
+
+## Enter phase 3
+
+1. Treat `config/profiles-claude-pilot.json` as provisional input and keep `validated_for_active: false`.
+2. Freeze three shadow policies: fixed Sonnet, the simple contract rule, and Jev using the same Claude pool.
+3. Replay the pilot through common deterministic and semantic verification; do not expose gold labels to routing or verification.
+4. Record Jev decision cost/latency separately from generation, verification, fallback, and audit cost.
+5. Compare Jev with the contract rule, not only with fixed models. Jev must add measurable value beyond the rule to justify its operational complexity.
+6. Calibrate confidence/abstention and fallback thresholds on development data, preserving grouped source/template splits. Do not enable active mode.
+7. Produce a shadow report with route agreement, success, false accepts/rejects, escalation rate, full cost, latency, and the overhead sensitivity boundary from phase 2.
+
+Do not set `mode: active`. The next operational mode is a true fixed-baseline shadow implementation, which must be completed before serving routed recommendations.

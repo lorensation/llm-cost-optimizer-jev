@@ -1,0 +1,111 @@
+{
+  "version": "claude-pilot-2026-09-20",
+  "validated_for_active": false,
+  "dataset_sha256": "372a55fae24adc71a05b28df1def9b429955ecb7d02e7ca0f80222a1299da1ac",
+  "results_sha256": "1d946a70819269b19dfda839ac09fe9a5d1e57435605fce2e42cacb4517fb0d1",
+  "config_sha256": "fd4ed9219936249f62b1b97b5b5f452e8e4594f8a81bdf1e917354ea91aa5e65",
+  "evaluator_sha256": "b74892c19c157939702bcfb4c37ce8292938ad01286fc592fc5c5c27e485c4ad",
+  "experiment": {
+    "provider": "openrouter",
+    "temperature": 0,
+    "max_output_tokens": 256,
+    "models": {
+      "economy": "anthropic/claude-haiku-4.5",
+      "balanced": "anthropic/claude-sonnet-5",
+      "strong": "anthropic/claude-opus-5"
+    }
+  },
+  "profiles": [
+    {
+      "contract_id": "classify_ticket_v1",
+      "model_alias": "balanced",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4636,
+      "expected_cost_microusd": 1333,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "classify_ticket_v1",
+      "model_alias": "economy",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 1508,
+      "expected_cost_microusd": 388,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "classify_ticket_v1",
+      "model_alias": "strong",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4870,
+      "expected_cost_microusd": 3056,
+      "qualified_fallback": true
+    },
+    {
+      "contract_id": "context_qa_v1",
+      "model_alias": "balanced",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4317,
+      "expected_cost_microusd": 1815,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "context_qa_v1",
+      "model_alias": "economy",
+      "successes": 24,
+      "sample_size": 30,
+      "quality_lower_bound": 0.62694,
+      "p95_latency_ms": 2303,
+      "expected_cost_microusd": 568,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "context_qa_v1",
+      "model_alias": "strong",
+      "successes": 30,
+      "sample_size": 30,
+      "quality_lower_bound": 0.886483,
+      "p95_latency_ms": 4460,
+      "expected_cost_microusd": 5167,
+      "qualified_fallback": true
+    },
+    {
+      "contract_id": "extract_invoice_v1",
+      "model_alias": "balanced",
+      "successes": 40,
+      "sample_size": 40,
+      "quality_lower_bound": 0.912375,
+      "p95_latency_ms": 2864,
+      "expected_cost_microusd": 1073,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "extract_invoice_v1",
+      "model_alias": "economy",
+      "successes": 40,
+      "sample_size": 40,
+      "quality_lower_bound": 0.912375,
+      "p95_latency_ms": 1725,
+      "expected_cost_microusd": 435,
+      "qualified_fallback": false
+    },
+    {
+      "contract_id": "extract_invoice_v1",
+      "model_alias": "strong",
+      "successes": 40,
+      "sample_size": 40,
+      "quality_lower_bound": 0.912375,
+      "p95_latency_ms": 2913,
+      "expected_cost_microusd": 2691,
+      "qualified_fallback": true
+    }
+  ],
+  "notice": "Measured on the synthetic phase 2 pilot. Not an untouched final test and not validated for active routing."
+}
