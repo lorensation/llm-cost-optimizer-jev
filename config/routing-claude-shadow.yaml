@@ -1,0 +1,33 @@
+mode: shadow
+database_url: sqlite:///data/autopilot-shadow.db
+bind_host: 127.0.0.1
+policy_id: claude-shadow-2026-09-20
+decision_transport: openrouter_decisions
+decision_model: typesafe/jev-1.13
+request_budget_microusd: 100000
+deadline_ms: 90000
+max_output_tokens: 256
+max_generations: 1
+decision_reserve_microusd: 200
+audit_probability: 0.0
+contracts_dir: contracts
+profiles_path: config/profiles-claude-pilot.json
+models:
+  economy:
+    model_id: anthropic/claude-haiku-4.5
+    provider: openrouter
+    input_microusd_per_million: 1000000
+    output_microusd_per_million: 5000000
+    context_tokens: 200000
+  balanced:
+    model_id: anthropic/claude-sonnet-5
+    provider: openrouter
+    input_microusd_per_million: 2000000
+    output_microusd_per_million: 10000000
+    context_tokens: 1000000
+  strong:
+    model_id: anthropic/claude-opus-5
+    provider: openrouter
+    input_microusd_per_million: 5000000
+    output_microusd_per_million: 25000000
+    context_tokens: 1000000

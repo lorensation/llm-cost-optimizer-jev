@@ -1,0 +1,14 @@
+{
+  "mode": "real",
+  "cases": 100,
+  "expected_rows": 100,
+  "observed_rows": 100,
+  "dataset_sha256": "372a55fae24adc71a05b28df1def9b429955ecb7d02e7ca0f80222a1299da1ac",
+  "results_sha256": "701f4f18a65405146865e201412e30e2ef467bcab3a00df1cb027a259e0ed20f",
+  "questions_sha256": "37bae5b6e1b06037a178907c9b32b805047a39dcbb8107108bd98807345b0644",
+  "profiles_sha256": "be1d2893b628e0e20b7ba7be704d03b686798b676b616a044581d416e9680c3b",
+  "preflight_microusd_for_pending": 2828,
+  "actual_spend_microusd": 2242,
+  "complete_cost": true,
+  "completed_at": "2026-09-20T10:57:02.491491+00:00"
+}

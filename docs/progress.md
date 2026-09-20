@@ -7,7 +7,7 @@ Updated 2026-09-20.
 | 0 | local complete | Skill and lock present; live contracts reviewed; decisions, provider contracts, environment and pending budgets documented. |
 | 1 | complete | Local invariants plus real Haiku/Sonnet/Opus generation and OpenRouter Decisions smokes passed. Six calls cost $0.00319 with complete billing metadata. |
 | 2 | complete | 100 labeled synthetic cases and 300 paired Claude generations completed with no provider errors or unknown costs. Spend was $0.537627. The decision is `continue_router`; evidence and provisional profiles remain blocked from active use. |
-| 3 | ready for measured shadow | Reproducible empirical routing and explicit fallback exist. The next comparison is fixed Sonnet vs the contract rule vs Jev, with common verification and overhead accounting. |
+| 3 | shadow signal captured | Reproducible empirical routing, explicit fallback, and a labeled trajectory-cost estimate exist. A real Jev shadow run over the 100 pilot cases ($0.002242) matched task family and missing-evidence gold labels on every case, diagnostic only and not yet applied to selection. Remaining: turn the diagnostic into a tested gate under fase 4's common verification and re-run the fixed/rule/Jev comparison with that gate in place. |
 | 4 | local implementation | Mandatory gates, two-attempt state machine, deadline/budget checks, idempotency and API are covered by tests. Calibration remains phase 6 work. |
 | 5 | partial local implementation | Durable jobs, leases, ownership checks, payload expiry and transactional enqueue exist. Heartbeats, bounded retry policy, independent judge and human sampling remain pending. |
 | 6 | pending experiment | No final dataset, frozen test, paid baselines, savings claim, or promotion decision exists. |
