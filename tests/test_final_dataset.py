@@ -22,11 +22,20 @@ def test_final_dataset_is_disjoint_from_the_pilot() -> None:
 
 def test_final_dataset_has_more_groups_than_the_pilot_for_tighter_intervals() -> None:
     final_rows = load_final()
-    assert len(final_rows) == 256
-    assert len({row["group_id"] for row in final_rows}) == 72
+    assert len(final_rows) == 376
+    assert len({row["group_id"] for row in final_rows}) == 102
     assert sum(row["contract_id"] == "extract_invoice_v1" for row in final_rows) == 96
     assert sum(row["contract_id"] == "classify_ticket_v1" for row in final_rows) == 80
     assert sum(row["contract_id"] == "context_qa_v1" for row in final_rows) == 80
+    assert sum(row["contract_id"] == "classify_code_request_v1" for row in final_rows) == 120
+
+
+def test_code_request_family_is_balanced_across_its_taxonomy() -> None:
+    final_rows = load_final()
+    code = [row for row in final_rows if row["contract_id"] == "classify_code_request_v1"]
+    labels = [row["expected"]["label"] for row in code]
+    for label in ("planning", "refactoring", "testing", "fix", "documentation", "other"):
+        assert labels.count(label) == 20
 
 
 def test_final_dataset_enriches_qa_abstention_and_documents_it_as_deliberate() -> None:

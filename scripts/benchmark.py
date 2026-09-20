@@ -213,7 +213,8 @@ def build_report(args: argparse.Namespace) -> None:
     case_rows, rows = read_jsonl(args.input), read_jsonl(args.results)
     cases = {row["id"]: row for row in case_rows}
     summary = summarize(cases, rows)
-    contracts = load_contracts(Path("contracts"))
+    contract_ids_in_scope = {row["contract_id"] for row in case_rows}
+    contracts = {cid: c for cid, c in load_contracts(Path("contracts")).items() if cid in contract_ids_in_scope}
     lines = ["# Claude pilot report", "", f"Dataset SHA-256: `{file_hash(args.input)}`.", "",
              "> Real provider measurements on a synthetic pilot. This is not an untouched final test.", "",
              "| contract | model | n | success | Wilson lower 95% | cost µUSD | cost/success | p95 ms | errors |",

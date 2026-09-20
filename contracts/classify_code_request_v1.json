@@ -1,0 +1,15 @@
+{
+  "id":"classify_code_request_v1", "version":"1", "family":"classification",
+  "description":"Classify a software engineering request made to a coding assistant.",
+  "output_schema":{"type":"object","properties":{"label":{"type":"string","enum":["planning","refactoring","testing","fix","documentation","other"]}},"required":["label"],"additionalProperties":false},
+  "taxonomy":{
+    "planning":"Deciding scope, architecture, or task breakdown before writing code.",
+    "refactoring":"Restructuring or cleaning up existing working code without changing its behavior.",
+    "testing":"Writing, fixing, or improving coverage of automated tests.",
+    "fix":"A concrete bug, crash, or incorrect behavior that needs correcting.",
+    "documentation":"Writing or updating docstrings, comments, README, or API docs.",
+    "other":"Multiple categories apply with no clear primary one, or the request is out of scope for these categories."
+  },
+  "required_checks":["json_schema","taxonomy","semantic_label"],
+  "allow_abstention":true, "min_quality":0.85, "max_source_chars":24000
+}
