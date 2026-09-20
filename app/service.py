@@ -73,7 +73,8 @@ class AutopilotService:
             if aggregate(all_checks, contract.required_checks) == CheckStatus.PASS:
                 result = GenerateResponse(request_id=request_id,status="accepted",output=call.content,contract_passed=True,attempts=attempt,final_model=call.resolved_model,checks=all_checks,cost_microusd=total_cost,cost_status="final" if total_cost is not None else "incomplete",policy=self.policy)
                 selected = random.random() < self.config.audit_probability
-                audit = (self.config.audit_probability,"random",{"source":request.source,"output":call.content,"contract_id":contract.id}) if selected else None
+                needs_human_review = selected and random.random() < self.config.audit_human_sample_probability
+                audit = (self.config.audit_probability,"random",{"source":request.source,"output":call.content,"contract_id":contract.id},needs_human_review) if selected else None
                 self.store.finish(request_id,result.model_dump(mode="json"),total_cost,result.cost_status,audit)
                 return result
         result = self._rejected(request_id,all_checks,attempts,"contract_not_satisfied",total_cost)

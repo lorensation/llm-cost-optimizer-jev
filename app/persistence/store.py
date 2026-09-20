@@ -26,12 +26,12 @@ class IdempotencyConflict(RuntimeError):
 
 
 class Store:
-    def __init__(self, database_url: str, migration_path: str | Path = "migrations/001_initial.sql") -> None:
+    def __init__(self, database_url: str, migrations_dir: str | Path = "migrations") -> None:
         if not database_url.startswith("sqlite:///"):
             raise ValueError("V1 supports sqlite:/// URLs only")
         self.path = Path(database_url.removeprefix("sqlite:///"))
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.migration_path = Path(migration_path)
+        self.migrations_dir = Path(migrations_dir)
         self._lock = threading.RLock()
 
     def connect(self) -> sqlite3.Connection:
@@ -43,8 +43,14 @@ class Store:
 
     def migrate(self) -> None:
         with self.connect() as conn:
-            conn.executescript(self.migration_path.read_text(encoding="utf-8"))
-            conn.execute("INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(1, ?)", (utcnow(),))
+            conn.execute("CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)")
+        for path in sorted(self.migrations_dir.glob("*.sql")):
+            version = int(path.stem.split("_", 1)[0])
+            with self.connect() as conn:
+                if conn.execute("SELECT 1 FROM schema_migrations WHERE version=?", (version,)).fetchone():
+                    continue
+                conn.executescript(path.read_text(encoding="utf-8"))
+                conn.execute("INSERT OR IGNORE INTO schema_migrations(version, applied_at) VALUES(?, ?)", (version, utcnow()))
 
     @contextmanager
     def immediate(self) -> Iterator[sqlite3.Connection]:
@@ -101,14 +107,20 @@ class Store:
             )
             conn.execute("UPDATE reservations SET status=?,final_microusd=?,updated_at=? WHERE id=?", (status, result.cost_microusd, utcnow(), reservation_id))
 
-    def finish(self, request_id: str, result: dict[str, Any], cost_microusd: int | None, cost_status: str, audit: tuple[float, str, dict[str, Any]] | None = None) -> None:
+    def finish(self, request_id: str, result: dict[str, Any], cost_microusd: int | None, cost_status: str, audit: tuple[float, str, dict[str, Any], bool] | None = None) -> None:
         with self.immediate() as conn:
             conn.execute("UPDATE requests SET status=?,result_json=?,cost_microusd=?,cost_status=? WHERE id=?", (result["status"], json.dumps(result), cost_microusd, cost_status, request_id))
             if audit:
-                probability, reason, payload = audit
+                probability, reason, payload, needs_human_review = audit
                 now = utcnow()
                 expiry = (datetime.now(UTC) + timedelta(days=7)).isoformat()
-                conn.execute("INSERT INTO audit_jobs VALUES(?,?, 'pending',?,?,?,?,NULL,NULL,0,NULL,?,?)", (str(uuid.uuid4()), request_id, probability, reason, json.dumps(payload), expiry, now, now))
+                conn.execute(
+                    "INSERT INTO audit_jobs(id,request_id,status,inclusion_probability,selection_reason,payload_json,"
+                    "payload_expires_at,lease_owner,lease_until,attempts,result_json,needs_human_review,human_review_json,"
+                    "created_at,updated_at) VALUES(?,?, 'pending',?,?,?,?,NULL,NULL,0,NULL,?,NULL,?,?)",
+                    (str(uuid.uuid4()), request_id, probability, reason, json.dumps(payload), expiry,
+                     int(needs_human_review), now, now),
+                )
 
     def claim_job(self, owner: str, lease_seconds: int = 60) -> sqlite3.Row | None:
         now = datetime.now(UTC)
@@ -123,6 +135,45 @@ class Store:
     def complete_job(self, job_id: str, owner: str, result: dict[str, Any]) -> bool:
         with self.immediate() as conn:
             changed = conn.execute("UPDATE audit_jobs SET status='complete',result_json=?,updated_at=? WHERE id=? AND status='leased' AND lease_owner=? AND lease_until>=?", (json.dumps(result), utcnow(), job_id, owner, utcnow())).rowcount
+            return changed == 1
+
+    def heartbeat_job(self, job_id: str, owner: str, lease_seconds: int) -> bool:
+        """Extends an in-progress lease so a slow judge call is not reclaimed by another worker mid-flight."""
+        with self.immediate() as conn:
+            lease_until = (datetime.now(UTC) + timedelta(seconds=lease_seconds)).isoformat()
+            changed = conn.execute(
+                "UPDATE audit_jobs SET lease_until=?,updated_at=? WHERE id=? AND status='leased' AND lease_owner=? AND lease_until>=?",
+                (lease_until, utcnow(), job_id, owner, utcnow()),
+            ).rowcount
+            return changed == 1
+
+    def fail_job(self, job_id: str, owner: str, max_attempts: int, error: str) -> str:
+        """Distinguishes a recoverable failure (released back to 'pending' for retry) from an exhausted one
+        (terminal 'exhausted' status), per PLAN section 5. Never silently marks a failure as 'pass'."""
+        with self.immediate() as conn:
+            row = conn.execute(
+                "SELECT attempts FROM audit_jobs WHERE id=? AND status='leased' AND lease_owner=?", (job_id, owner)
+            ).fetchone()
+            if not row:
+                raise RuntimeError("lease lost before failure could be recorded")
+            if row["attempts"] >= max_attempts:
+                conn.execute(
+                    "UPDATE audit_jobs SET status='exhausted',result_json=?,updated_at=? WHERE id=?",
+                    (json.dumps({"status": "exhausted", "error": error, "attempts": row["attempts"]}), utcnow(), job_id),
+                )
+                return "exhausted"
+            conn.execute(
+                "UPDATE audit_jobs SET status='pending',lease_owner=NULL,lease_until=NULL,updated_at=? WHERE id=?",
+                (utcnow(), job_id),
+            )
+            return "pending"
+
+    def record_human_review(self, job_id: str, reviewer: str, verdict: dict[str, Any]) -> bool:
+        with self.immediate() as conn:
+            changed = conn.execute(
+                "UPDATE audit_jobs SET human_review_json=?,updated_at=? WHERE id=? AND needs_human_review=1",
+                (json.dumps({"reviewer": reviewer, "verdict": verdict, "recorded_at": utcnow()}), utcnow(), job_id),
+            ).rowcount
             return changed == 1
 
     def expire_payloads(self) -> int:

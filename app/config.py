@@ -56,6 +56,8 @@ class AppConfig(BaseSettings):
     max_generations: int = Field(default=2, ge=1, le=2)
     decision_reserve_microusd: int = Field(default=100, ge=0)
     audit_probability: float = Field(ge=0, le=1)
+    audit_human_sample_probability: float = Field(default=0.0, ge=0, le=1)
+    audit_max_attempts: int = Field(default=3, ge=1)
     contracts_dir: Path
     profiles_path: Path
     models: dict[str, ModelConfig]

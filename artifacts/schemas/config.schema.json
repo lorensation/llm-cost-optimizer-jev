@@ -111,6 +111,19 @@
       "title": "Audit Probability",
       "type": "number"
     },
+    "audit_human_sample_probability": {
+      "default": 0.0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Audit Human Sample Probability",
+      "type": "number"
+    },
+    "audit_max_attempts": {
+      "default": 3,
+      "minimum": 1,
+      "title": "Audit Max Attempts",
+      "type": "integer"
+    },
     "contracts_dir": {
       "format": "path",
       "title": "Contracts Dir",
