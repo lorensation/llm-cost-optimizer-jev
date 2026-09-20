@@ -1,0 +1,20 @@
+{
+  "mode": "real",
+  "cases": 396,
+  "arms": [
+    "fixed_balanced",
+    "fixed_strong",
+    "llm_judge_router",
+    "jev_gated"
+  ],
+  "expected_rows": 1584,
+  "observed_rows": 1584,
+  "dataset_sha256": "44ef861512057a39172ee84e973d7d2bd21f41c0ad87535fdd083f9e176c4393",
+  "results_sha256": "361d0de8e435823f8f0fc2ae59bc22b659fdf1ca9f1714925c6bb48f5bac4808",
+  "profiles_sha256": "3662bd6d0854e4cfeade7cb3a727e595ce0aa73f03404eed75b58f9afe3f44cd",
+  "questions_sha256": "37bae5b6e1b06037a178907c9b32b805047a39dcbb8107108bd98807345b0644",
+  "preflight_microusd_for_pending": 20457367,
+  "actual_spend_microusd": 3646015,
+  "complete_cost": true,
+  "completed_at": "2026-09-20T12:55:21.437695+00:00"
+}

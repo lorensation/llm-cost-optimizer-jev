@@ -7,9 +7,11 @@ from app.contracts import CallResult
 
 
 class FixtureProvider:
-    async def generate(self, *, model: str, request: str, source: str, output_schema: dict[str, Any], max_tokens: int, timeout_s: float) -> CallResult:
+    async def generate(self, *, model: str, request: str, source: str, output_schema: dict[str, Any], max_tokens: int, timeout_s: float, system_prompt: str | None = None) -> CallResult:
         props = output_schema.get("properties", {})
-        if "invoice_number" in props:
+        if "tier" in props:
+            content = {"tier": "economy"}
+        elif "invoice_number" in props:
             invoice = re.search(r"(?:invoice|factura)\s*(?:n[oº.]*)?\s*[:#-]?\s*([A-Z0-9-]+)", source, re.I)
             total = re.search(r"total\s*[:=]?\s*([0-9]+(?:[.,][0-9]+)?)", source, re.I)
             content = {"invoice_number": invoice.group(1) if invoice else None, "total": float(total.group(1).replace(",", ".")) if total else None}
