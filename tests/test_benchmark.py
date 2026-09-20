@@ -3,7 +3,9 @@ from argparse import Namespace
 from pathlib import Path
 
 from app.config import load_contracts
-from scripts.benchmark import build_profiles, build_report, evaluate, file_hash, public_request, read_jsonl, wilson_lower
+from scripts.benchmark import (
+    build_profiles, build_report, canonical_json_hash, evaluate, file_hash, public_request, read_jsonl, wilson_lower,
+)
 
 
 def test_pilot_dataset_has_balanced_first_twenty_and_no_unresolved_labels() -> None:
@@ -63,5 +65,6 @@ def test_full_pilot_report_and_profiles_capture_the_decision(tmp_path: Path) -> 
     assert "**39.2% less**" in report_text
     assert "**`continue_router`**" in report_text
     assert profile_data["validated_for_active"] is False
-    assert profile_data["results_sha256"] == file_hash(results)
+    assert profile_data["results_sha256"] == canonical_json_hash(read_jsonl(results))
+    assert profile_data["results_file_sha256"] == file_hash(results)
     assert len(profile_data["profiles"]) == 9

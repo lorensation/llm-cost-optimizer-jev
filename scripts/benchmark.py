@@ -309,7 +309,8 @@ def build_profiles(args: argparse.Namespace) -> None:
     } for (contract_id, alias), item in sorted(summary.items())]
     payload = {
         "version": f"claude-pilot-{datetime.now(UTC).date().isoformat()}", "validated_for_active": False,
-        "dataset_sha256": file_hash(args.input), "results_sha256": file_hash(args.results),
+        "dataset_sha256": file_hash(args.input), "results_sha256": canonical_json_hash(rows),
+        "results_file_sha256": file_hash(args.results),
         "config_sha256": file_hash(Path(args.config)), "evaluator_sha256": file_hash(Path(__file__)),
         "experiment": {
             "provider": "openrouter", "temperature": 0, "max_output_tokens": config.max_output_tokens,
